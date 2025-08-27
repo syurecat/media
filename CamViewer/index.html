@@ -116,6 +116,8 @@
     const switchTest = document.getElementById("switchTest")
     const statusDiv = document.getElementById("status");
     let currentStream = null;
+    let testToneOscillator = null;
+    let audioCtx = null;
 
     async function init() {
     try {
@@ -188,6 +190,7 @@
 
     // 再接続処理
     function retryConnection(deviceId) {
+      statusDiv.textContent = "状態: 再接続中";
       setTimeout(() => startCamera(deviceId), 2000);
     }
 
@@ -196,6 +199,34 @@
       startCamera(cameraSelect.value);
     };
 
+    function startTestTone() {
+      if (audioCtx) return;
+
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      testToneOscillator = audioCtx.createOscillator();
+      testToneOscillator.type = "sine";
+      testToneOscillator.frequency.value = 1000;
+      const gainNode = audioCtx.createGain();
+      gainNode.gain.value = 0.2;
+
+      testToneOscillator.connect(gainNode);
+      gainNode.connect(audioCtx.destination);
+
+      testToneOscillator.start(); 
+    }
+
+    function stopTestTone() {
+      if (testToneOscillator) {
+        testToneOscillator.stop();
+        testToneOscillator.disconnect();
+        testToneOscillator = null;
+      }
+      if (audioCtx) {
+        audioCtx.close();
+        audioCtx = null;
+      }
+    }
+
     // テストパターン表示
     function showTestPattern() {
       stopCamera();
@@ -203,14 +234,18 @@
       canvas.style.display = "block";
       switchTest.textContent = "カメラ画面";
       switchTest.setAttribute('onclick', 'showCamera()');
+      startTestTone();
       statusDiv.textContent = "状態: テスト画面表示中";
     }
 
     // カメラ表示
     function showCamera() {
+      stopTestTone();
       video.style.display = "block";
       canvas.style.display = "none";
+      switchTest.textContent = "テスト画面";
       switchTest.setAttribute('onclick', 'showTestPattern()');
+      retryConnection();
     }
 
     // 全画面表示
