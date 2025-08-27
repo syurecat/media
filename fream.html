@@ -10,9 +10,9 @@
       --gap: 12px;
       --border: 3px;
       --radius: 10px;
-      --bg: #0b0b0b;
-      --frame: #e5e7eb;   /* 枠線色 */
-      --label: #e5e7eb;   /* 文字色 */
+      --bg: #222;
+      --frame: #fff;   /* 枠線色 */
+      --label: #fff;   /* 文字色 */
       --label-shadow: rgba(0,0,0,.6);
     }
 
@@ -51,7 +51,7 @@
       inset: 0;
       display: grid;
       place-items: center;
-      font-size: clamp(22px, 6vw, 64px);
+      font-size: var(--font);
       font-weight: 800;
       letter-spacing: .02em;
       text-shadow: 0 2px 8px var(--label-shadow);
@@ -89,9 +89,11 @@
       <div class="title">メディア部門 16:9用 カメラ練習用フレーム</div>
       <div>制作: 2025年メディア部門長</div>
       <div class="controls">
+        <label>文字サイズ <input id="font-size" type="range" min="1" max="8" value="4" step="0.1"/></label>
         <label>余白 <input id="gap" type="range" min="0" max="48" value="12" /></label>
         <label>枠太さ <input id="border" type="range" min="1" max="10" value="3" /></label>
         <button id="toggleBg">背景トグル</button>
+        <button id="toggleFullscreen">全画面表示</button>
       </div>
     </div>
 
@@ -126,9 +128,16 @@
 
   <script>
     const root = document.documentElement;
+    const font = document.getElementById('font-size');
     const bgBtn = document.getElementById('toggleBg');
     const gap = document.getElementById('gap');
     const border = document.getElementById('border');
+    const grid = document.getElementById('grid');
+    const toggleFullscreen = document.getElementById('toggleFullscreen');
+
+    font.addEventListener('input', e => {
+      root.style.setProperty('--font', `clamp(12px, ${e.target.value}vw, 128px)`)
+    })
 
     gap.addEventListener('input', e => {
       root.style.setProperty('--gap', `${e.target.value}px`);
@@ -150,6 +159,14 @@
         root.style.setProperty('--label', '#e5e7eb');
       }
       document.body.style.background = getComputedStyle(root).getPropertyValue('--bg');
+    });
+
+    toggleFullscreen.addEventListener('click', () => {
+      if (!document.fullscreenElement) {
+        grid.requestFullscreen();
+      } else {
+        document.exitFullscreen();
+      }
     });
   </script>
 </body>

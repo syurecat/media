@@ -226,7 +226,6 @@
     navigator.mediaDevices.ondevicechange = async () => {
       const prev = cameraSelect.value;
       const cams = await listCameras();
-      // 前と同じ deviceId があればそれを選択、なければ最初のやつにする
       if (cams.some(c => c.deviceId === prev)) {
         cameraSelect.value = prev;
       } else if (cams[0]) {

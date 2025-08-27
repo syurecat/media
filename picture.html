@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>画像解像度を落とす</title>
+</head>
+<body>
+    <label>縮小率: </label>
+    <input id="denomRange" type="range" min="1" max="9" value="2">
+    <span id="denomValue">1/2</span>
+    <br>
+    <input type="file" id="inputImage" accept="image/*">
+    <br>
+    <canvas id="canvas"></canvas>
+
+    <script>
+        const input = document.getElementById('inputImage');
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const denomRange = document.getElementById('denomRange');
+        const denomValue = document.getElementById('denomValue');
+
+        denomRange.addEventListener('input', () => {
+            denomValue.textContent = `1/${denomRange.value}`;
+        });
+
+        input.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const img = new Image();
+            img.onload = () => {
+                const denom = parseInt(document.getElementById('denom').value, 10);
+                if (isNaN(denom) || denom < 1) return alert('分母は1以上の整数にしてください');
+
+                const width = img.width / denom;
+                const height = img.height / denom;
+
+                canvas.width = width;
+                canvas.height = height;
+
+                ctx.drawImage(img, 0, 0, width, height);
+
+                const originalName = file.name;
+                const dotIndex = originalName.lastIndexOf('.');
+                const name = dotIndex !== -1 ? originalName.slice(0, dotIndex) : originalName;
+                const ext = dotIndex !== -1 ? originalName.slice(dotIndex) : '';
+                const newFileName = name + '_lowres' + ext;
+
+                let mimeType = 'image/png';
+                if (ext === '.jpg' || ext === '.jpeg') mimeType = 'image/jpeg';
+                else if (ext === '.webp') mimeType = 'image/webp';
+                else if (ext === '.bmp') mimeType = 'image/bmp';
+                else if (ext === '.gif') mimeType = 'image/gif';
+
+                canvas.toBlob((blob) => {
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = newFileName;
+                    a.click();
+                }, mimeType);
+            };
+            img.src = URL.createObjectURL(file);
+        });
+    </script>
+</body>
+</html>
