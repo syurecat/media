@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>メディア部門　WEBカメラ取得</title>
+<style>
+  body { display: flex; flex-direction: column; align-items: center; background: #222; color: #fff; font-family: sans-serif; margin: 0; }
+  header { padding: 10px; }
+  header { position: relative; text-align: center; width: 95vw; }
+  header h2 { margin: 0; }
+  header h4 { position: absolute; right: 0; top: 50%; margin: 0; }
+  video, .colorbar { border: 3px solid #fff; border-radius: 8px; max-width: 95vw; max-height: 80vh; background: black; aspect-ratio: 16 / 9; font-size: 0; position: relative; }
+  #controls { margin: 10px; }
+  button, select { margin: 5px; padding: 6px 12px; border-radius: 6px; border: none; font-size: 14px; }
+  #status { margin: 5px; font-weight: bold; }
+  .colorbar { opacity: 1; height: auto; width: 95vw; }
+  @media (orientation: portrait) { .colorbar { height: 80vh; width: auto; aspect-ratio: 9 / 16; } .rotate { height: auto; width: 80vh; aspect-ratio: 16 / 9;  position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(90deg); transform-origin: center center; }}
+  .inner { position: absolute; top: 0; left: 0; right: 0; bottom: 0; }
+  .top { height: calc( 100% * 7 / 12 ); }
+  .top div { display: inline-block; width: calc( 75% / 7 ); height: 100%; }
+  .w40 { width: 12.5% !important; background-color: rgb(40%, 40%, 40%); }
+  .w75 { background-color: rgb(75%, 75%, 75%); }
+  .y75 { background-color: rgb(75%, 75%,  0%); }
+  .c75 { background-color: rgb( 0%, 75%, 75%); }
+  .g75 { background-color: rgb( 0%, 75%,  0%); }
+  .m75 { background-color: rgb(75%,  0%, 75%); }
+  .r75 { background-color: rgb(75%,  0%,  0%); }
+  .b75 { background-color: rgb( 0%,  0%, 75%); }
+  .mid { height: calc( 100% / 12 ); }
+  .mid div { display: inline-block; width: 12.5%; height: 100%; }
+  .mid .w75 { width: calc( 75% * 6 / 7 ); }
+  .mid .w100 {width: calc( 75% / 7 ); }
+  .c100 { background-color: rgb(   0%, 100%, 100%); }
+  .w100 {	background-color: rgb( 100%, 100%, 100%); }
+  .b100 { background-color: rgb(   0%,   0%, 100%); }
+  .y100 { background-color: rgb( 100%, 100%,   0%); }
+  .ramp { width: 75% !important; background-image: linear-gradient(to right, #000 0%, #FFF 100%); }
+  .r100 { background-color: rgb( 100%,   0%,   0%); }
+  .btm { height: 25%; }
+  .btm div { display: inline-block; height: 100%; }
+  .w15 { width: 12.5%; background-color: rgb( 15%, 15%, 15%); }
+  [class^="bk"] { background-color: rgb( 0%, 0%, 0%); }
+  .bk1 { width: calc( 75% * 1.5 / 7); }
+  .btm .w100 { width: calc( 75% * 2 / 7); }
+  .bk2 { width: calc( 75% * ( 1 - 4.5 / 7 - 5 / 21 ) ); }
+  .bk3, [class^="bk-"] { width: calc( 75% / 21 ); }
+  .bk4 { width: calc( 75% / 7 ); }
+  .bk-p2 { background-color: rgb( 2%, 2%, 2% ); }
+  .bk-p4 { background-color: rgb( 4%, 4%, 4% ); }
+</style>
+</head>
+<body>
+  <header>
+    <h2>メディア部門　WEBカメラ取得</h2>
+    <h4>制作: 2025メディア部門長</h4>
+  </header>
+
+  <video id="camera" autoplay playsinline style="display: block;"></video>
+  <div class="colorbar" id="colorbar" style="display: none;">
+    <div class="rotate" id="rotate">
+      <div class="inner">
+        <div class="top">
+          <div class="w40"></div>
+          <div class="w75"></div>
+          <div class="y75"></div>
+          <div class="c75"></div>
+          <div class="g75"></div>
+          <div class="m75"></div>
+          <div class="r75"></div>
+          <div class="b75"></div>
+          <div class="w40"></div>
+        </div>
+        <div class="mid">
+          <div class="c100"></div>
+          <div class="w100"></div>  
+          <div class="w75"></div>
+          <div class="b100"></div>
+        </div>
+        <div class="mid">
+          <div class="y100"></div>
+          <div class="ramp"></div>
+          <div class="r100"></div>
+        </div>
+        <div class="btm">
+          <div class="w15"></div>
+          <div class="bk1"></div>
+          <div class="w100"></div>
+          <div class="bk2"></div>
+          <div class="bk-m2"></div>
+          <div class="bk3"></div>
+          <div class="bk-p2"></div>
+          <div class="bk3"></div>
+          <div class="bk-p4"></div>
+          <div class="bk4"></div>
+          <div class="w15"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="controls">
+    <select id="cameraSelect"></select>
+    <button id="switchTest" onclick="showTestPattern()">テスト画面</button>
+    <button onclick="toggleFullscreen()">全画面</button>
+  </div>
+
+  <div id="status">状態: 未接続</div>
+
+  <script>
+    const video = document.getElementById("camera");
+    const canvas = document.getElementById("colorbar");
+    const canvasRotate = document.getElementById("rotate")
+    const cameraSelect = document.getElementById("cameraSelect");
+    const switchTest = document.getElementById("switchTest")
+    const statusDiv = document.getElementById("status");
+    let currentStream = null;
+
+    async function init() {
+    try {
+      statusDiv.textContent = "状態: 権限許可待ち";
+      const tempStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+      tempStream.getTracks().forEach(t => t.stop());
+
+      const cams = await listCameras();
+
+      cameraSelect.onchange = () => {
+        const id = cameraSelect.value;
+        startCamera(id);
+      };
+
+
+      if (cams.length > 0) {
+        startCamera(cams[0].deviceId);
+      } else {
+        statusDiv.textContent = "状態: カメラが見つかりません";
+      }
+    } catch (err) {
+      statusDiv.textContent = "状態: カメラ許可が必要 (" + (err && err.message) + ")";
+      console.error("init error:", err);
+    }
+  }
+
+    async function listCameras() {
+      const devices = await navigator.mediaDevices.enumerateDevices();
+      const cams = devices.filter(d => d.kind === "videoinput");
+      cameraSelect.innerHTML = "";
+      devices.forEach(device => {
+        if (device.kind === "videoinput") {
+          const option = document.createElement("option");
+          option.value = device.deviceId;
+          option.text = device.label || `カメラ (${cameraSelect.length + 1})`;
+          cameraSelect.appendChild(option);
+        }
+      });
+      return cams;
+    }
+
+    // カメラ開始
+    async function startCamera(deviceId) {
+      stopCamera();
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: { deviceId: deviceId ? { exact: deviceId } : undefined }
+        });
+        currentStream = stream;
+        video.srcObject = stream;
+        statusDiv.textContent = "状態: 接続中";
+
+        const track = stream.getVideoTracks()[0];
+        track.onended = () => {
+          statusDiv.textContent = "状態: 切断されました（再接続中…）";
+          retryConnection(deviceId);
+        };
+      } catch (err) {
+        statusDiv.textContent = "状態: エラー (" + err.message + ")";
+      }
+    }
+
+    // カメラ停止
+    function stopCamera() {
+      if (currentStream) {
+        currentStream.getTracks().forEach(track => track.stop());
+        currentStream = null;
+      }
+    }
+
+    // 再接続処理
+    function retryConnection(deviceId) {
+      setTimeout(() => startCamera(deviceId), 2000);
+    }
+
+    // カメラ切り替え
+    cameraSelect.onchange = () => {
+      startCamera(cameraSelect.value);
+    };
+
+    // テストパターン表示
+    function showTestPattern() {
+      stopCamera();
+      video.style.display = "none";
+      canvas.style.display = "block";
+      switchTest.textContent = "カメラ画面";
+      switchTest.setAttribute('onclick', 'showCamera()');
+      statusDiv.textContent = "状態: テスト画面表示中";
+    }
+
+    // カメラ表示
+    function showCamera() {
+      video.style.display = "block";
+      canvas.style.display = "none";
+      switchTest.setAttribute('onclick', 'showTestPattern()');
+    }
+
+    // 全画面表示
+    function toggleFullscreen() {
+      const elem = video.style.display === "none" ? canvasRotate : video;
+      if (!document.fullscreenElement) {
+        elem.requestFullscreen();
+      } else {
+        document.exitFullscreen();
+      }
+    }
+
+    navigator.mediaDevices.ondevicechange = async () => {
+      const prev = cameraSelect.value;
+      const cams = await listCameras();
+      // 前と同じ deviceId があればそれを選択、なければ最初のやつにする
+      if (cams.some(c => c.deviceId === prev)) {
+        cameraSelect.value = prev;
+      } else if (cams[0]) {
+        cameraSelect.value = cams[0].deviceId;
+        startCamera(cams[0].deviceId);
+      } else {
+        stopCamera();
+        statusDiv.textContent = "状態: カメラがありません";
+      }
+    };
+
+    // 初期化
+    window.addEventListener('load', init);
+  </script>
+</body>
+</html>
