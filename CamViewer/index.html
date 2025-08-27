@@ -49,6 +49,11 @@
   .bk4 { width: calc( 75% / 7 ); }
   .bk-p2 { background-color: rgb( 2%, 2%, 2% ); }
   .bk-p4 { background-color: rgb( 4%, 4%, 4% ); }
+  .starWrapper { height: auto; width: 38vw; }
+  @media (orientation: portrait) { .starWrapper { height: 32vh; width: auto; }}
+  .starWrapper { position: absolute; top: 50%; left: 50%; aspect-ratio: 1 / 1; transform: translate(-50%, -50%) rotate(0deg); transform-origin: center;}
+  .whiteCircle { position: absolute; top: 50%; left: 50%; width: 100%; height: 100%; background-color: white; border: 10px solid white; border-radius: 50%; background: transparent; transform: translate(-50%, -50%);}
+  .blackStar { position: absolute; top: 50%; left: 50%; width: 75%; height: 75%; background-color: black; clip-path: polygon( 50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35% ); transform: translate(-50%, -50%) rotate(0deg); transform-origin: center; }
 </style>
 </head>
 <body>
@@ -97,12 +102,19 @@
           <div class="w15"></div>
         </div>
       </div>
+      <div class="starWrapper" id="starWrapper">
+        <div class="whiteCircle" id="whiteCircle"></div>
+        <div class="blackStar" id="blackStar"></div>
+      </div>
+    </div>
+  </div>
     </div>
   </div>
 
   <div id="controls">
     <select id="cameraSelect"></select>
     <button id="switchTest" onclick="showTestPattern()">テスト画面</button>
+    <button id="switchSter" onclick="hiddenSter()" style="display: none;">星隠す</button>
     <button onclick="toggleFullscreen()">全画面</button>
   </div>
 
@@ -113,7 +125,9 @@
     const canvas = document.getElementById("colorbar");
     const canvasRotate = document.getElementById("rotate")
     const cameraSelect = document.getElementById("cameraSelect");
-    const switchTest = document.getElementById("switchTest")
+    const switchTest = document.getElementById("switchTest");
+    const starWrapper = document.getElementById("starWrapper");
+    const switchSter = document.getElementById("switchSter");
     const statusDiv = document.getElementById("status");
     let currentStream = null;
     let testToneOscillator = null;
@@ -232,17 +246,51 @@
       stopCamera();
       video.style.display = "none";
       canvas.style.display = "block";
+      switchSter.style.display = "inline-block";
       switchTest.textContent = "カメラ画面";
       switchTest.setAttribute('onclick', 'showCamera()');
       startTestTone();
+      startBlackStarRotation();
       statusDiv.textContent = "状態: テスト画面表示中";
+    }
+
+    function hiddenSter() {
+      starWrapper.style.display = "none"
+      switchSter.textContent = "星出す"
+      switchSter.setAttribute('onclick', 'showSter()');
+      stopBlackStarRotation();
+    }
+
+    function showSter() {
+      starWrapper.style.display = "block";
+      switchSter.textContent = "星隠す"
+      switchSter.setAttribute('onclick', 'hiddenSter()')
+      startBlackStarRotation();
+    }
+
+    let rotation = 0;
+    let rotateInterval = null;
+
+    function startBlackStarRotation() {
+        if (rotateInterval) return;
+        rotateInterval = setInterval(() => {
+            rotation += 2;
+            document.getElementById("blackStar").style.transform = `translate(-50%, -50%) rotate(${rotation}deg)`;
+        }, 15);
+    }
+
+    function stopBlackStarRotation() {
+        clearInterval(rotateInterval);
+        rotateInterval = null;
     }
 
     // カメラ表示
     function showCamera() {
       stopTestTone();
+      stopBlackStarRotation()
       video.style.display = "block";
       canvas.style.display = "none";
+      switchSter.style.display = "none";
       switchTest.textContent = "テスト画面";
       switchTest.setAttribute('onclick', 'showTestPattern()');
       retryConnection();
