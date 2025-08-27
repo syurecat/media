@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Camera Apps</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+        header {
+            background-color: #333;
+            color: white;
+            padding: 1rem;
+            text-align: center;
+        }
+        main {
+            padding: 2rem;
+        }
+        .app-list {
+            list-style: none;
+            padding: 0;
+        }
+        .app-list li {
+            background: white;
+            margin: 1rem 0;
+            padding: 1rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            transition: transform 0.2s;
+        }
+        .app-list li:hover {
+            transform: scale(1.02);
+        }
+        .app-list a {
+            text-decoration: none;
+            color: #333;
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+        .app-description {
+            color: #666;
+            font-size: 0.9rem;
+            margin-top: 0.3rem;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>メディア部門 簡易ツール</h1>
+        <p>このサイトはすべてクライアントで処理し、データをクラウドに上げません。取得したとしてもアクセスログぐらいです。</p>
+        <p>作成: 2025年メディア部門長</p>
+    </header>
+    <main>
+        <ul class="app-list">
+        <li>
+            <a href="CamViewer/" target="_blank">CamViewer</a>
+            <div class="app-description">Webカメラを表示します</div>
+        </li>
+        <li>
+            <a href="FrameTrainer/" target="_blank">FrameTrainer</a>
+            <div class="app-description">カメラ練習用のフレームを表示します</div>
+        </li>
+        <li>
+            <a href="ResReducer/" target="_blank">ResReducer</a>
+            <div class="app-description">画像の解像度を落とします</div>
+        </li>
+        </ul>
+    </main>
+</body>
+</html>
