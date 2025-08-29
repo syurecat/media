@@ -30,7 +30,7 @@
 
             const img = new Image();
             img.onload = () => {
-                const denom = parseInt(document.getElementById('denom').value, 10);
+                const denom = parseInt(denomRange.value, 10);
                 if (isNaN(denom) || denom < 1) return alert('分母は1以上の整数にしてください');
 
                 const width = img.width / denom;
